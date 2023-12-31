@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mermaid Charts</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: false });
+
+        function updateGanttChart() {
+            var input = document.getElementById('ganttInput').value;
+            var ganttContainer = document.getElementById('ganttContainer');
+
+            // Clear existing content
+            ganttContainer.innerHTML = '';
+
+            // Create a new div for Mermaid content
+            var newGanttDiv = document.createElement('div');
+            newGanttDiv.className = 'mermaid';
+            newGanttDiv.innerHTML = input;
+
+            // Append new div to the container
+            ganttContainer.appendChild(newGanttDiv);
+
+            // Re-render all Mermaid content on the page
+            mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+        }
+
+        function handleKeyUpEvent(event) {
+            if (event.key === "Enter") {
+                updateGanttChart();
+                event.preventDefault(); // Prevent default Enter key behavior
+            }
+        }
+
+        // Initialize all Mermaid diagrams on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('ganttInput').addEventListener('keyup', handleKeyUpEvent);
+            updateGanttChart(); // Render the initial Gantt chart
+        });
+	function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    updateGanttChart(); // Re-render the Gantt chart with the new color scheme
+};
+
+    </script>
+<style>
+        body {
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark-mode {
+            background-color: #1a1a1a;
+            color: white;
+        }
+
+        #ganttInput {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            border: 2px solid #007bff;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .dark-mode #ganttInput {
+            background-color: #333;
+            color: #fff;
+            border-color: #555;
+        }
+     .dark-mode .mermaid svg {
+        background-color: #2e2e2e; /* Dark background for the chart */
+    }
+
+    .dark-mode .mermaid svg .taskText {
+        fill: #ffffff; /* White text for tasks */
+    }
+
+    .dark-mode .mermaid svg .titleText {
+        fill: #ffffff; /* White text for the title */
+    }
+    </style>
+</head>
+<body>
+<button id="modeToggle" onclick="toggleDarkMode()">Toggle Dark/Light Mode</button>
+
+<h2>Gantt Chart</h2>
+<textarea id="ganttInput" rows="10" cols="50" placeholder="Enter Gantt Chart data here...">
+gantt
+    title A Gantt Diagram
+    dateFormat  YYYY-MM-DD
+    section Section
+    A task           :a1, 2023-01-01, 30d
+    Another task     :after a1  , 20d
+    section Another
+    Task in sec      :2023-01-12  , 12d
+    another task    : 24d
+</textarea><br>
+
+<div id="ganttContainer">
+    <div class="mermaid">
+    </div>
+</div>
+
+<h2>Gantt Chart Syntax Explanation</h2>
+<p>
+    The syntax for creating a Gantt chart in Mermaid.js is straightforward and intuitive. It starts with the keyword 'gantt' to indicate the type of chart. The 'title' directive sets the chart's title. 'dateFormat' specifies the format used for dates, typically 'YYYY-MM-DD'. Sections are created with the 'section' keyword, followed by a title. Each task within a section starts with a description, followed by a colon, an identifier, a start date, and a duration (e.g., '30d' for 30 days). Dependencies can be expressed using the 'after' keyword. This simple syntax allows for the creation of complex Gantt charts with ease.
+</p>
+
+</body>
+</html>
