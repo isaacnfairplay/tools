@@ -1,128 +1,103 @@
-let isDarkMode = true; // Add this line at the top of your script
+let isDarkMode = true;
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('taskForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        addTaskToChart();
-    });
-
+    document.getElementById('taskForm').addEventListener('submit', handleFormSubmit);
     document.getElementById('modeToggle').addEventListener('click', toggleDarkMode);
     updateGanttChart();
 });
 
+document.addEventListener("keydown", function (e) {
+    if (e.code === "Enter") {
+        updateGanttChart();
+    }
+});
+
+function handleFormSubmit(event) {
+    event.preventDefault();
+    const task = getTaskFromForm();
+    if (task) {
+        addTaskToChart(task);
+    }
+}
+
+function getTaskFromForm() {
+    const section = document.getElementById('sectionName').value.trim();
+    const taskName = document.getElementById('taskName').value.trim();
+    const duration = document.getElementById('duration').value.trim();
+    const startDate = document.getElementById('startDate').value.trim();
+    const dependency = document.getElementById('dependency').value.trim();
+
+    if (!section || !taskName || !duration) {
+        alert('Please fill in all required fields: section, task name, and duration.');
+        return null;
+    }
+
+    return { section, taskName, duration, startDate, dependency };
+}
+
+function addTaskToChart(task) {
+    const ganttInput = document.getElementById('ganttInput');
+    const newTaskLine = formatTaskLine(task);
+    ganttInput.value += newTaskLine;
+    updateGanttChart();
+}
+
+function formatTaskLine(task) {
+    let newTaskLine = `\n${task.section}\n    ${task.taskName}`;
+    if (task.dependency) {
+        newTaskLine += ` :after ${task.dependency}`;
+    } else if (task.startDate) {
+        newTaskLine += ` : ${task.startDate}`;
+    }
+    newTaskLine += `, ${task.duration}`;
+    return newTaskLine;
+}
+
 function toggleDarkMode() {
-    console.log('Toggling dark mode...');
     isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark-mode');
-    console.log(document.body.classList); // Log the classList of the body element
     updateGanttChart();
-};
+}
 
 function updateGanttChart() {
-    theme = !isDarkMode ? 'dark' : 'default';
-    console.log('Updating Gantt chart...');
-    var input = document.getElementById('ganttInput').value;
-    var ganttContainer = document.getElementById('ganttContainer');
+    const theme = !isDarkMode ? 'dark' : 'default';
+    const input = document.getElementById('ganttInput').value;
+    const ganttContainer = document.getElementById('ganttContainer');
 
-    // Clear existing content
-    ganttContainer.innerHTML = '';
-
-    // Create a new div for Mermaid content
-    var newGanttDiv = document.createElement('div');
-    newGanttDiv.className = 'mermaid';
-    newGanttDiv.innerHTML = input;
-
-    // Append new div to the container
+    clearGanttContainer(ganttContainer);
+    const newGanttDiv = createGanttDiv(input);
     ganttContainer.appendChild(newGanttDiv);
 
-    // Initialize Mermaid with custom CSS and the specified theme
+    initializeMermaid(theme);
+    mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+}
+
+function clearGanttContainer(ganttContainer) {
+    ganttContainer.innerHTML = '';
+}
+
+function createGanttDiv(input) {
+    const newGanttDiv = document.createElement('div');
+    newGanttDiv.className = 'mermaid';
+    newGanttDiv.innerHTML = input;
+    return newGanttDiv;
+}
+
+function initializeMermaid(theme) {
     mermaid.initialize({ 
         startOnLoad: true,
         theme: theme
     });
-
-    mermaid.init(undefined, document.querySelectorAll('.mermaid'));
-};
-document.addEventListener("keydown", function (e) {
-    if (e.code === "Enter") { //checks whether the pressed key is "Enter"
-    updateGanttChart();
-    }
-    });
-    function addTaskToChart() {
-        var section = document.getElementById('sectionName').value.trim();
-        var taskName = document.getElementById('taskName').value.trim();
-        var duration = document.getElementById('duration').value.trim();
-        var startDate = document.getElementById('startDate').value.trim();
-        var dependency = document.getElementById('dependency').value.trim();
-    
-        // Check if required fields are filled
-        if (!section || !taskName || !duration) {
-            alert('Please fill in all required fields: section, task name, and duration.');
-            return;
-        }
-    
-        // Format the new task line
-        var newTaskLine = `\n${section}\n    ${taskName}`;
-        if (dependency) {
-            newTaskLine += ` :after ${dependency}`;
-        } else if (startDate) {
-            newTaskLine += ` : ${startDate}`;
-        }
-        newTaskLine += `, ${duration}`;
-    
-        // Append the new task line to the existing Gantt chart data
-        var ganttInput = document.getElementById('ganttInput');
-        ganttInput.value += newTaskLine;
-    
-        // Update the Gantt chart
-        updateGanttChart();
-    }
-    function addTaskToChart() {
-        var section = document.getElementById('sectionName').value.trim();
-        var taskName = document.getElementById('taskName').value.trim();
-        var duration = document.getElementById('duration').value.trim();
-        var startDate = document.getElementById('startDate').value.trim();
-        var dependency = document.getElementById('dependency').value.trim();
-    
-        // Check if required fields are filled
-        if (!section || !taskName || !duration) {
-            alert('Please fill in all required fields: section, task name, and duration.');
-            return;
-        }
-    
-        // Format the new task line
-        var newTaskLine = `    ${taskName}`;
-        if (dependency) {
-            newTaskLine += ` :after ${dependency}`;
-        } else if (startDate) {
-            newTaskLine += ` : ${startDate}`;
-        }
-        newTaskLine += `, ${duration}`;
-    
-        // Get the existing Gantt chart data
-        var ganttInput = document.getElementById('ganttInput');
-        var ganttData = ganttInput.value;
-    
-        // Check if the section exists
-        var sectionIndex = ganttData.indexOf(`section ${section}`);
-        if (sectionIndex === -1) {
-            // If the section doesn't exist, add it
-            ganttData += `\nsection ${section}\n${newTaskLine}`;
-        } else {
-            // If the section exists, add the task to it
-            var nextSectionIndex = ganttData.indexOf('\nsection', sectionIndex + 1);
-            if (nextSectionIndex === -1) {
-                // If this is the last section, just append the task
-                ganttData += `\n${newTaskLine}`;
-            } else {
-                // If this is not the last section, insert the task before the next section
-                ganttData = ganttData.slice(0, nextSectionIndex) + '\n' + newTaskLine + ganttData.slice(nextSectionIndex);
-            }
-        }
-    
-        // Update the Gantt chart data
-        ganttInput.value = ganttData;
-    
-        // Update the Gantt chart
-        updateGanttChart();
-    }
+}
+function formatSyntax() {
+    const ganttInput = document.getElementById('ganttInput');
+    const ganttInputHighlighted = document.getElementById('ganttInputHighlighted');
+    const keywords = ['section', 'after','dateformat','gantt',':','title','crit','active','done']; // Replace with your keywords
+    ganttInputHighlighted.innerHTML = highlightKeywords(ganttInput.value, keywords);
+}
+function formatSyntax() {
+    const ganttInput = document.getElementById('ganttInput');
+    const ganttInputHighlighted = document.getElementById('ganttInputHighlighted');
+    const keywords = ['section', 'after','dateformat','gantt',':','title','crit','active','done']; // Replace with your keywords
+    ganttInputHighlighted.innerHTML = highlightKeywords(ganttInput.value, keywords);
+}
