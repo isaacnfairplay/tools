@@ -10,33 +10,16 @@ document.addEventListener('DOMContentLoaded', function() {
     updateGanttChart();
 });
 
-function getCustomMermaidStyle() {
-    console.log(isDarkMode); // Use the isDarkMode variable here
-    if (isDarkMode) {
-        return `
-            .taskText, .titleText { fill: #ffffff; }
-            .grid .tick text { fill: #e0e0e0; } /* Style for tick marks */
-            .sectionTitle { fill: #a0a0a0; } /* Style for section labels */
-            /* Additional dark mode styles */
-        `;
-    } else {
-        return `
-            .taskText, .titleText { fill: #000000; }
-            .grid .tick text { fill: #000000; } /* Style for tick marks */
-            .sectionTitle { fill: #333333; } /* Style for section labels */
-            /* Additional light mode styles */
-        `;
-    }
-}
-
 function toggleDarkMode() {
     console.log('Toggling dark mode...');
-    isDarkMode = !isDarkMode; // Toggle the isDarkMode variable here
+    isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark-mode');
+    console.log(document.body.classList); // Log the classList of the body element
     updateGanttChart();
 };
 
 function updateGanttChart() {
+    theme = !isDarkMode ? 'dark' : 'default';
     console.log('Updating Gantt chart...');
     var input = document.getElementById('ganttInput').value;
     var ganttContainer = document.getElementById('ganttContainer');
@@ -52,10 +35,10 @@ function updateGanttChart() {
     // Append new div to the container
     ganttContainer.appendChild(newGanttDiv);
 
-    // Initialize Mermaid with custom CSS
+    // Initialize Mermaid with custom CSS and the specified theme
     mermaid.initialize({ 
         startOnLoad: true,
-        themeCSS: getCustomMermaidStyle()
+        theme: theme
     });
 
     mermaid.init(undefined, document.querySelectorAll('.mermaid'));
@@ -65,23 +48,81 @@ document.addEventListener("keydown", function (e) {
     updateGanttChart();
     }
     });
-function addTaskToChart() {
-    var section = document.getElementById('sectionName').value.trim();
-    var taskName = document.getElementById('taskName').value.trim();
-    var duration = document.getElementById('duration').value.trim();
-    var startDate = document.getElementById('startDate').value.trim();
-    var dependency = document.getElementById('dependency').value.trim();
-
-    var newTaskLine = `\n    ${section}`;
-    newTaskLine += `\n    ${taskName}`;
-    if (dependency) {
-        newTaskLine += ` :after ${dependency}`;
-    } else if (startDate) {
-        newTaskLine += `, ${startDate}`;
+    function addTaskToChart() {
+        var section = document.getElementById('sectionName').value.trim();
+        var taskName = document.getElementById('taskName').value.trim();
+        var duration = document.getElementById('duration').value.trim();
+        var startDate = document.getElementById('startDate').value.trim();
+        var dependency = document.getElementById('dependency').value.trim();
+    
+        // Check if required fields are filled
+        if (!section || !taskName || !duration) {
+            alert('Please fill in all required fields: section, task name, and duration.');
+            return;
+        }
+    
+        // Format the new task line
+        var newTaskLine = `\n${section}\n    ${taskName}`;
+        if (dependency) {
+            newTaskLine += ` :after ${dependency}`;
+        } else if (startDate) {
+            newTaskLine += ` : ${startDate}`;
+        }
+        newTaskLine += `, ${duration}`;
+    
+        // Append the new task line to the existing Gantt chart data
+        var ganttInput = document.getElementById('ganttInput');
+        ganttInput.value += newTaskLine;
+    
+        // Update the Gantt chart
+        updateGanttChart();
     }
-    newTaskLine += `, ${duration}`;
-
-    var currentData = document.getElementById('ganttInput').value;
-    document.getElementById('ganttInput').value = currentData + newTaskLine;
-    updateGanttChart();
-}
+    function addTaskToChart() {
+        var section = document.getElementById('sectionName').value.trim();
+        var taskName = document.getElementById('taskName').value.trim();
+        var duration = document.getElementById('duration').value.trim();
+        var startDate = document.getElementById('startDate').value.trim();
+        var dependency = document.getElementById('dependency').value.trim();
+    
+        // Check if required fields are filled
+        if (!section || !taskName || !duration) {
+            alert('Please fill in all required fields: section, task name, and duration.');
+            return;
+        }
+    
+        // Format the new task line
+        var newTaskLine = `    ${taskName}`;
+        if (dependency) {
+            newTaskLine += ` :after ${dependency}`;
+        } else if (startDate) {
+            newTaskLine += ` : ${startDate}`;
+        }
+        newTaskLine += `, ${duration}`;
+    
+        // Get the existing Gantt chart data
+        var ganttInput = document.getElementById('ganttInput');
+        var ganttData = ganttInput.value;
+    
+        // Check if the section exists
+        var sectionIndex = ganttData.indexOf(`section ${section}`);
+        if (sectionIndex === -1) {
+            // If the section doesn't exist, add it
+            ganttData += `\nsection ${section}\n${newTaskLine}`;
+        } else {
+            // If the section exists, add the task to it
+            var nextSectionIndex = ganttData.indexOf('\nsection', sectionIndex + 1);
+            if (nextSectionIndex === -1) {
+                // If this is the last section, just append the task
+                ganttData += `\n${newTaskLine}`;
+            } else {
+                // If this is not the last section, insert the task before the next section
+                ganttData = ganttData.slice(0, nextSectionIndex) + '\n' + newTaskLine + ganttData.slice(nextSectionIndex);
+            }
+        }
+    
+        // Update the Gantt chart data
+        ganttInput.value = ganttData;
+    
+        // Update the Gantt chart
+        updateGanttChart();
+    }
