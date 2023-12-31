@@ -31,20 +31,23 @@
     <script>
         // Function to return custom CSS based on current mode
         function getCustomMermaidStyle() {
-            if (document.body.classList.contains('dark-mode')) {
-                return `
-                    .taskText { fill: #ffffff; }
-                    .titleText { fill: #ffffff; }
-                    /* Additional dark mode styles */
-                `;
-            } else {
-                return `
-                    .taskText { fill: #000000; }
-                    .titleText { fill: #000000; }
-                    /* Additional light mode styles */
-                `;
+        if (document.body.classList.contains('dark-mode')) {
+            return `
+                .taskText, .titleText { fill: #ffffff; }
+                .grid .tick text { fill: #e0e0e0; } /* Style for tick marks */
+                .sectionTitle { fill: #a0a0a0; } /* Style for section labels */
+                /* Additional dark mode styles */
+            `;}
+        else {
+        return `
+            .taskText, .titleText { fill: #000000; }
+            .grid .tick text { fill: #000000; } /* Style for tick marks */
+            .sectionTitle { fill: #333333; } /* Style for section labels */
+            /* Additional light mode styles */
+        `;
             }
         }
+
 
         mermaid.initialize({ startOnLoad: false });
 
@@ -93,6 +96,15 @@
 </head>
 <body>
     <button id="modeToggle" onclick="toggleDarkMode()">Toggle Dark/Light Mode</button>
+    <h2>Add Task to Gantt Chart</h2>
+    <form id="taskForm">
+        <input type="text" id="sectionName" placeholder="Section Name" required>
+        <input type="text" id="taskName" placeholder="Task Name" required>
+        <input type="text" id="duration" placeholder="Duration (e.g., 30d)" required>
+        <input type="text" id="startDate" placeholder="Start Date (YYYY-MM-DD)">
+        <input type="text" id="dependency" placeholder="After Task (task ID)">
+        <button type="submit">Add Task</button>
+    </form>
 
     <h2>Gantt Chart</h2>
     <textarea id="ganttInput" rows="10" cols="50" placeholder="Enter Gantt Chart data here...">

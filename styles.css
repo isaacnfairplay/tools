@@ -1,0 +1,49 @@
+body {
+    transition: background-color 0.3s, color 0.3s;
+    font-family: Arial, sans-serif;
+}
+
+.dark-mode {
+    background-color: #1a1a1a;
+    color: white;
+}
+
+#taskForm {
+    margin: 10px 0;
+}
+
+#taskForm input, #taskForm button {
+    margin: 5px;
+    padding: 8px;
+}
+
+#taskForm button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#modeToggle {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#modeToggle:hover {
+    background-color: #45a049;
+}
+
+#taskForm, #ganttInput, #ganttContainer {
+    margin-bottom: 20px;
+}
+
+#ganttInput {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Additional styles as needed */
